@@ -1,6 +1,6 @@
 import DBConn from '@/lib/DBConn';
 import { verifyToken } from '@/lib/jwt';
-import { followUser } from '@/middlewares/userZod';
+import { follow_UnfollowUser } from '@/middlewares/userZod';
 import userModel from '@/models/userModel';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
@@ -33,7 +33,7 @@ export const POST = async (req: Request) => {
   }
 
   try {
-    const validateData = followUser.parse(data);
+    const validateData = follow_UnfollowUser.parse(data);
 
     await DBConn();
 
@@ -51,7 +51,7 @@ export const POST = async (req: Request) => {
       );
     }
 
-    const addFollow = await userModel.findByIdAndUpdate(
+    await userModel.findByIdAndUpdate(
       UserId,
       {
         $push: {
@@ -59,7 +59,7 @@ export const POST = async (req: Request) => {
         },
       },
       {
-        new: true,
+        new: false,
       },
     );
 

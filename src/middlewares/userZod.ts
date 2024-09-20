@@ -41,7 +41,7 @@ const updateProfile = z.object({
   bio: z.string().optional(),
 });
 
-const followUser = z.object({
+const follow_UnfollowUser = z.object({
   id: z.string().min(24, 'Invalid id format.'),
 });
 
@@ -55,4 +55,10 @@ const fileSchema = z.object({
   size: z.number().max(20 * 1024 * 1024, 'File size should not exceed 20MB'),
 });
 
-export { userSignup, userLogin, updateProfile, followUser, fileSchema };
+export {
+  userSignup,
+  userLogin,
+  updateProfile,
+  follow_UnfollowUser,
+  fileSchema,
+};
