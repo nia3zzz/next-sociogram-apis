@@ -13,7 +13,10 @@ const userSignup = z.object({
     .optional()
     .nullable(),
   bio: z.string().optional().nullable(),
-  following: z.array(z.string().uuid()).optional().nullable(),
+  following: z
+    .array(z.string().min(24, 'Invalid id format.'))
+    .optional()
+    .nullable(),
   password: z.string().min(6, 'Password is required of 6 characters.'),
 });
 

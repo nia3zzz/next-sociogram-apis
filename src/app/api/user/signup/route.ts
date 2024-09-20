@@ -73,6 +73,7 @@ export const POST = async (req: Request) => {
       gender: validateData.gender,
       profilePic: validateData.profilePic,
       bio: validateData.bio,
+      following: validateData.following,
       password: hashedPassword,
     });
 

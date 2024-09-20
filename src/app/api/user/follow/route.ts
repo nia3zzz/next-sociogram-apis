@@ -1,3 +1,4 @@
+import DBConn from '@/lib/DBConn';
 import { verifyToken } from '@/lib/jwt';
 import { followUser } from '@/middlewares/userZod';
 import userModel from '@/models/userModel';
@@ -34,21 +35,38 @@ export const POST = async (req: Request) => {
   try {
     const validateData = followUser.parse(data);
 
+    await DBConn();
+
+    const checkUserExists = await userModel.findById({ _id: validateData.id });
+
+    if (!checkUserExists) {
+      return NextResponse.json(
+        {
+          state: 'error',
+          message: 'No User found with this id.',
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
     const addFollow = await userModel.findByIdAndUpdate(
+      UserId,
       {
-        _id: UserId,
+        $push: {
+          following: validateData.id,
+        },
       },
       {
-        $push: { following: validateData.id },
+        new: true,
       },
     );
-
-    console.log(addFollow);
 
     return NextResponse.json(
       {
         state: 'success',
-        message: 'User updated',
+        message: 'User followed.',
       },
       { status: 200 },
     );
