@@ -18,7 +18,7 @@ export const POST = async (req: Request) => {
     );
   }
 
-  const UserId = verifyUser.id;
+  const userId = verifyUser.id;
 
   const data = await req.json();
 
@@ -37,9 +37,9 @@ export const POST = async (req: Request) => {
 
     await DBConn();
 
-    const checkUserExists = await userModel.findById({ _id: validateData.id });
+    const foundUser = await userModel.findById({ _id: validateData.id });
 
-    if (!checkUserExists) {
+    if (!foundUser) {
       return NextResponse.json(
         {
           state: 'error',
@@ -52,10 +52,22 @@ export const POST = async (req: Request) => {
     }
 
     await userModel.findByIdAndUpdate(
-      UserId,
+      userId,
       {
         $push: {
           following: validateData.id,
+        },
+      },
+      {
+        new: false,
+      },
+    );
+
+    await userModel.findByIdAndUpdate(
+      foundUser._id,
+      {
+        $push: {
+          followers: userId,
         },
       },
       {

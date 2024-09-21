@@ -12,13 +12,13 @@ export const POST = async (req: Request) => {
     return NextResponse.json(
       {
         state: 'error',
-        message: "Can't unfollow this user, login first",
+        message: "Can't remove this user, login first",
       },
       { status: 401 },
     );
   }
 
-  const userId = verifyUser.id;
+  const UserId = verifyUser.id;
 
   const data = await req.json();
 
@@ -26,7 +26,7 @@ export const POST = async (req: Request) => {
     return NextResponse.json(
       {
         state: 'error',
-        message: "Can't continue without Id info to unfollow.",
+        message: "Can't continue to remove an user with no id.",
       },
       { status: 400 },
     );
@@ -37,9 +37,9 @@ export const POST = async (req: Request) => {
 
     await DBConn();
 
-    const foundUser = await userModel.findById({ _id: validateData.id });
+    const checkUserExists = await userModel.findById({ _id: validateData.id });
 
-    if (!foundUser) {
+    if (!checkUserExists) {
       return NextResponse.json(
         {
           state: 'error',
@@ -52,10 +52,10 @@ export const POST = async (req: Request) => {
     }
 
     await userModel.findByIdAndUpdate(
-      userId,
+      UserId,
       {
         $pull: {
-          following: validateData.id,
+          followers: validateData.id,
         },
       },
       {
@@ -64,10 +64,10 @@ export const POST = async (req: Request) => {
     );
 
     await userModel.findByIdAndUpdate(
-      foundUser._id,
+      validateData.id,
       {
         $pull: {
-          followers: userId,
+          following: UserId,
         },
       },
       {
@@ -78,24 +78,24 @@ export const POST = async (req: Request) => {
     return NextResponse.json(
       {
         state: 'success',
-        message: 'User unfollowed.',
+        message: 'User following removed.',
       },
       { status: 200 },
     );
   } catch (error) {
     if (error instanceof ZodError) {
-      console.error('Unfollow user validation failed', error.errors);
+      console.error('Remove follower user validation failed', error.errors);
       return NextResponse.json(
         {
           state: 'error',
-          message: 'Unfollow user validation failed.',
+          message: 'Remove follower user validation failed.',
           errors: error.errors[0].message,
         },
         { status: 400 },
       );
     }
 
-    console.error('User unfollowing failed', error);
+    console.error('Remove follower failed', error);
     return NextResponse.json(
       {
         state: 'error',

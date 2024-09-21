@@ -39,7 +39,7 @@ export const POST = async (req: Request) => {
 
     await DBConn();
 
-    const updateUser = await userModel.findByIdAndUpdate(userId, validateData);
+    await userModel.findByIdAndUpdate(userId, validateData);
 
     return NextResponse.json(
       {
