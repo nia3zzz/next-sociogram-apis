@@ -55,10 +55,37 @@ export const GET = async (req: Request, { params }: { params: Iparams }) => {
           bio: retrieveUser.bio,
           following: retrieveUser.following,
           followers: retrieveUser.followers,
+          blockList: retrieveUser.blockedUsers,
           joinedOn: retrieveUser.createdAt,
           lastEdited: retrieveUser.updatedAt,
         },
         { status: 200 },
+      );
+    }
+
+    const foundUser = await userModel.findOne({ _id: verifyUser?.id });
+
+    if (foundUser.blockedUsers.includes(retrieveUser._id)) {
+      return NextResponse.json(
+        {
+          state: 'success',
+          message: 'You blocked the user.',
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
+    if (retrieveUser.blockedUsers.includes(verifyUser?.id)) {
+      return NextResponse.json(
+        {
+          state: 'success',
+          message: 'You are blocked by the user.',
+        },
+        {
+          status: 403,
+        },
       );
     }
 

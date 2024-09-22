@@ -5,7 +5,7 @@ import userModel from '@/models/userModel';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
-export const POST = async (req: Request) => {
+export const PUT = async (req: Request) => {
   const verifyUser = verifyToken(process.env.JWT_SECRET as string, req);
 
   if (!verifyUser) {

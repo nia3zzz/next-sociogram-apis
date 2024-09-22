@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
 
-export const POST = async (req: Request) => {
+export const PUT = async (req: Request) => {
   try {
     const verifyUser = verifyToken(process.env.JWT_SECRET as string, req);
 
