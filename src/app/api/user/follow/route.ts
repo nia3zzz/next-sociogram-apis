@@ -35,6 +35,18 @@ export const POST = async (req: Request) => {
   try {
     const validateData = follow_UnfollowUser.parse(data);
 
+    if (userId === validateData.id) {
+      return NextResponse.json(
+        {
+          state: 'error',
+          message: "Can't follow yourself.",
+        },
+        {
+          status: 409,
+        },
+      );
+    }
+
     await DBConn();
 
     const foundUser = await userModel.findById({ _id: validateData.id });
@@ -47,6 +59,44 @@ export const POST = async (req: Request) => {
         },
         {
           status: 400,
+        },
+      );
+    }
+
+    const retrieveUser = await userModel.findById({ _id: userId });
+
+    if (retrieveUser.following.includes(validateData.id)) {
+      return NextResponse.json(
+        {
+          state: 'error',
+          message: 'You are already following this user',
+        },
+        {
+          status: 409,
+        },
+      );
+    }
+
+    if (foundUser.blockedUsers.includes(userId)) {
+      return NextResponse.json(
+        {
+          state: 'success',
+          message: 'This user has blocked you.',
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
+    if (retrieveUser.blockedUsers.includes(validateData.id)) {
+      return NextResponse.json(
+        {
+          state: 'success',
+          message: 'This user is blocked by you.',
+        },
+        {
+          status: 403,
         },
       );
     }

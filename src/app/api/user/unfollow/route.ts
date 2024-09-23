@@ -51,6 +51,44 @@ export const PUT = async (req: Request) => {
       );
     }
 
+    const retrieveUser = await userModel.findById({ _id: userId });
+
+    if (!foundUser.followers.includes(userId)) {
+      return NextResponse.json(
+        {
+          state: 'error',
+          message: 'Follow the user first to unfollow.',
+        },
+        {
+          status: 409,
+        },
+      );
+    }
+
+    if (foundUser.blockedUsers.includes(userId)) {
+      return NextResponse.json(
+        {
+          state: 'success',
+          message: 'You are blocked by this user.',
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
+    if (retrieveUser.blockedUsers.includes(validateData.id)) {
+      return NextResponse.json(
+        {
+          state: 'success',
+          message: 'You blocked this user.',
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
     await userModel.findByIdAndUpdate(
       userId,
       {

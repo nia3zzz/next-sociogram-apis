@@ -69,6 +69,34 @@ export const POST = async (req: Request) => {
       );
     }
 
+    if (retrieveUser.following.includes(validateData.id)) {
+      await userModel.findByIdAndUpdate(
+        userId,
+        {
+          $pull: {
+            following: validateData.id,
+            followers: validateData.id,
+          },
+        },
+        {
+          new: false,
+        },
+      );
+
+      await userModel.findByIdAndUpdate(
+        validateData.id,
+        {
+          $pull: {
+            following: userId,
+            followers: userId,
+          },
+        },
+        {
+          new: false,
+        },
+      );
+    }
+
     await userModel.findByIdAndUpdate(userId, {
       $push: {
         blockedUsers: validateData.id,
