@@ -1,6 +1,6 @@
 import DBConn from '@/lib/DBConn';
 import { hash } from '@/middlewares/hashFunc';
-import { userSignup } from '@/middlewares/userZod';
+import { follow_UnfollowUser, userSignup } from '@/middlewares/userZod';
 import userModel from '@/models/userModel';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
@@ -63,6 +63,26 @@ export const POST = async (req: Request) => {
         );
       }
     }
+
+    if (validateData.following && validateData.following.length > 0) {
+      for (let i = 0; i < validateData.following.length; i++) {
+        const checkUserExists = await userModel.findById({
+          _id: validateData.following[i],
+        });
+
+        if (!checkUserExists) {
+          return NextResponse.json(
+            {
+              state: 'error',
+              message: `No user found with this Id, ${validateData.following[i]}`,
+            },
+            {
+              status: 400,
+            },
+          );
+        }
+      }
+    }
     const hashedPassword = await hash(validateData.password);
 
     const user = await userModel.create({
@@ -76,6 +96,22 @@ export const POST = async (req: Request) => {
       following: validateData.following,
       password: hashedPassword,
     });
+
+    if (validateData.following && validateData.following.length > 0) {
+      for (let i = 0; i < validateData.following.length; i++) {
+        await userModel.findByIdAndUpdate(
+          validateData.following[i],
+          {
+            $push: {
+              followers: user._id,
+            },
+          },
+          {
+            new: false,
+          },
+        );
+      }
+    }
 
     return NextResponse.json(
       {

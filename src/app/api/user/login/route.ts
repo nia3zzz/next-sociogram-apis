@@ -5,6 +5,7 @@ import { initializeToken } from '@/lib/jwt';
 import { userLogin } from '@/middlewares/userZod';
 import DBConn from '@/lib/DBConn';
 import { ZodError } from 'zod';
+import sendMail from '@/lib/nodemailer';
 
 export const POST = async (req: Request) => {
   const data = await req.json();
@@ -44,6 +45,20 @@ export const POST = async (req: Request) => {
       );
     }
 
+    if (!user?.isVerified) {
+      await sendMail(user.email);
+
+      return NextResponse.json(
+        {
+          state: 'error',
+          message: 'Authenticate yourself, code has been sent to your email.',
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
     const hashedPassword = await decode(validateData.password, user.password);
 
     if (!hashedPassword) {
@@ -68,8 +83,13 @@ export const POST = async (req: Request) => {
       );
     }
     return NextResponse.json(
-      { state: 'error', message: 'Something went wrong.' },
-      { status: 500 },
+      {
+        state: 'error',
+        message: 'Something went wrong.',
+      },
+      {
+        status: 500,
+      },
     );
   }
 };

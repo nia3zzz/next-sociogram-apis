@@ -45,6 +45,11 @@ const follow_UnfollowUser = z.object({
   id: z.string().min(24, 'Invalid id format.'),
 });
 
+const verificationCode = z.object({
+  email: z.string().email('Invalid email format.'),
+  code: z.string().min(6, 'Code should be of 6 characters'),
+});
+
 const fileSchema = z.object({
   originalname: z.string(),
   mimetype: z
@@ -60,5 +65,6 @@ export {
   userLogin,
   updateProfile,
   follow_UnfollowUser,
+  verificationCode,
   fileSchema,
 };

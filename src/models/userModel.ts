@@ -10,7 +10,7 @@ interface IUser extends Document {
   bio?: string;
   following: [mongoose.Types.ObjectId];
   followers: [mongoose.Types.ObjectId];
-  blockedUsers: [mongoose.Types.ObjectId];
+  isVerified: boolean;
   password: string;
 }
 
@@ -70,13 +70,11 @@ const UserSchema: Schema<IUser> = new mongoose.Schema(
       },
     ],
 
-    blockedUsers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: false,
-      },
-    ],
+    isVerified: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
 
     password: {
       type: String,
