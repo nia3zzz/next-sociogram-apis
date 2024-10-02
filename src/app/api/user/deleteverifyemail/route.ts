@@ -1,12 +1,29 @@
 import DBConn from '@/lib/DBConn';
+import { verifyToken } from '@/lib/jwt';
 import { decode } from '@/middlewares/hashFunc';
-import { verificationCode } from '@/middlewares/userZod';
+import { verificationCodeDelete } from '@/middlewares/userZod';
 import userModel from '@/models/userModel';
 import verifyMailModel from '@/models/verifyMail';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
-export const POST = async (req: Request) => {
+export const DELETE = async (req: Request) => {
+  const verifyUser = verifyToken(process.env.JWT_SECRET as string, req);
+
+  if (!verifyUser) {
+    return NextResponse.json(
+      {
+        state: 'error',
+        message: "Can't delete this account, login first",
+      },
+      {
+        status: 401,
+      },
+    );
+  }
+
+  const userId = verifyUser.id;
+
   const data = await req.json();
 
   if (!data) {
@@ -22,37 +39,13 @@ export const POST = async (req: Request) => {
   }
 
   try {
-    const validateData = verificationCode.parse(data);
+    const validateData = verificationCodeDelete.parse(data);
 
     await DBConn();
 
-    const foundUser = await userModel.findOne({
-      email: validateData.email,
+    const foundUser = await userModel.findById({
+      _id: userId,
     });
-
-    if (!foundUser) {
-      return NextResponse.json(
-        {
-          state: 'error',
-          message: 'No user found with this email.',
-        },
-        {
-          status: 404,
-        },
-      );
-    }
-
-    if (foundUser.isVerified) {
-      return NextResponse.json(
-        {
-          state: 'error',
-          message: 'Your email is already verified',
-        },
-        {
-          status: 409,
-        },
-      );
-    }
 
     const verificationCodeDocument = await verifyMailModel.findOne({
       author: foundUser._id,
@@ -87,16 +80,27 @@ export const POST = async (req: Request) => {
       );
     }
 
-    await userModel.findByIdAndUpdate(foundUser._id, {
-      $set: {
-        isVerified: true,
-      },
-    });
+    await userModel.deleteOne({ _id: userId });
+
+    await userModel.updateMany(
+      { following: userId },
+      { $pull: { following: userId } },
+    );
+
+    await userModel.updateMany(
+      { followers: userId },
+      { $pull: { followers: userId } },
+    );
+
+    await userModel.updateMany(
+      { blockedUsers: userId },
+      { $pull: { blockedUsers: userId } },
+    );
 
     return NextResponse.json(
       {
         state: 'success',
-        message: 'Your email is now verified.',
+        message: 'User deleted.',
       },
       {
         status: 200,
@@ -104,7 +108,7 @@ export const POST = async (req: Request) => {
     );
   } catch (error) {
     if (error instanceof ZodError) {
-      console.error('Verify mail validation failed.');
+      console.error('Delete user validation failed.');
       return NextResponse.json({
         state: 'error',
         message: 'Failed in type validation',
@@ -112,7 +116,7 @@ export const POST = async (req: Request) => {
       });
     }
 
-    console.error('Verifying email failed: ', error);
+    console.error('Delete user failed: ', error);
     return NextResponse.json(
       {
         state: 'error',

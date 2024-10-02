@@ -1,5 +1,6 @@
 import DBConn from '@/lib/DBConn';
 import { verifyToken } from '@/lib/jwt';
+import sendMail from '@/lib/nodemailer';
 import userModel from '@/models/userModel';
 import { NextResponse } from 'next/server';
 
@@ -23,27 +24,15 @@ export const DELETE = async (req: Request) => {
   try {
     await DBConn();
 
-    await userModel.deleteOne({ _id: userId });
+    const foundUser = await userModel.findById({ _id: userId });
 
-    await userModel.updateMany(
-      { following: userId },
-      { $pull: { following: userId } },
-    );
-
-    await userModel.updateMany(
-      { followers: userId },
-      { $pull: { followers: userId } },
-    );
-
-    await userModel.updateMany(
-      { blockedUsers: userId },
-      { $pull: { blockedUsers: userId } },
-    );
+    await sendMail(foundUser.email);
 
     return NextResponse.json(
       {
         state: 'success',
-        message: 'User deleted, ready to delete token.',
+        message:
+          'Enter code to delete your account, code has been sent to your email.',
       },
       {
         status: 200,
