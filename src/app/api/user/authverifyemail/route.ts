@@ -1,6 +1,6 @@
 import DBConn from '@/lib/DBConn';
 import { decode } from '@/middlewares/hashFunc';
-import { verificationCode } from '@/middlewares/userZod';
+import { verificationCodeAuth } from '@/middlewares/userZod';
 import userModel from '@/models/userModel';
 import verifyMailModel from '@/models/verifyMail';
 import { NextResponse } from 'next/server';
@@ -22,7 +22,7 @@ export const POST = async (req: Request) => {
   }
 
   try {
-    const validateData = verificationCode.parse(data);
+    const validateData = verificationCodeAuth.parse(data);
 
     await DBConn();
 

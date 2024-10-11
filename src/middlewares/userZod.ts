@@ -6,12 +6,6 @@ const userSignup = z.object({
   email: z.string().email('Invalid email format.'),
   telePhone: z.string().optional().nullable(),
   gender: z.enum(['male', 'female']),
-  profilePic: z
-    .string()
-    .url()
-    .min(1, 'Gender is required.')
-    .optional()
-    .nullable(),
   bio: z.string().optional().nullable(),
   following: z
     .array(z.string().min(24, 'Invalid id format.'))
@@ -32,13 +26,13 @@ const userLogin = z
   });
 
 const updateProfile = z.object({
-  name: z.string().min(1, 'Name is required.').optional(),
-  userName: z.string().min(1, 'Username is required.').optional(),
-  email: z.string().email('Invalid email format.').optional(),
+  name: z.string().min(1, 'Name is required.'),
+  userName: z.string().min(1, 'Username is required.'),
+  email: z.string().email('Invalid email format.'),
   telePhone: z.string().optional(),
-  gender: z.enum(['male', 'female']).optional(),
+  gender: z.enum(['male', 'female']),
   profilePic: z.string().url().optional(),
-  bio: z.string().optional(),
+  bio: z.string(),
 });
 
 const follow_UnfollowUser = z.object({
@@ -54,16 +48,6 @@ const verificationCodeDelete = z.object({
   code: z.string().min(6, 'Code should be of 6 characters'),
 });
 
-const fileSchema = z.object({
-  originalname: z.string(),
-  mimetype: z
-    .string()
-    .refine((mimetype) => ['image/png', 'image/jpeg'].includes(mimetype), {
-      message: 'Only PNG and JPEG files are allowed.',
-    }),
-  size: z.number().max(20 * 1024 * 1024, 'File size should not exceed 20MB'),
-});
-
 export {
   userSignup,
   userLogin,
@@ -71,5 +55,4 @@ export {
   follow_UnfollowUser,
   verificationCodeAuth,
   verificationCodeDelete,
-  fileSchema,
 };

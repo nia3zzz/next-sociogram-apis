@@ -1,12 +1,18 @@
 import DBConn from '@/lib/DBConn';
+import cloudinary from '@/middlewares/cloudinary';
 import { hash } from '@/middlewares/hashFunc';
-import { follow_UnfollowUser, userSignup } from '@/middlewares/userZod';
+import { userSignup } from '@/middlewares/userZod';
 import userModel from '@/models/userModel';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
+interface CloudinaryUploadResult {
+  public_id: string;
+  [key: string]: any;
+}
+
 export const POST = async (req: Request) => {
-  const data = await req.json();
+  const data = await req.formData();
 
   if (!data) {
     return NextResponse.json(
@@ -17,8 +23,27 @@ export const POST = async (req: Request) => {
       { status: 400 },
     );
   }
+
+  const name = data.get('name');
+  const userName = data.get('userName');
+  const email = data.get('email');
+  const telePhone = data.get('telePhone');
+  const gender = data.get('gender');
+  const bio = data.get('bio');
+  const following = data.get('following');
+  const password = data.get('password');
+
   try {
-    const validateData = userSignup.parse(data);
+    const validateData = userSignup.parse({
+      name,
+      userName,
+      email,
+      telePhone,
+      gender,
+      bio,
+      following,
+      password,
+    });
 
     await DBConn();
 
@@ -48,7 +73,7 @@ export const POST = async (req: Request) => {
       );
     }
 
-    if (validateData.telePhone === null) {
+    if (validateData.telePhone !== null) {
       const duplicateTelePhone = await userModel.findOne({
         telePhone: validateData.telePhone,
       });
@@ -85,14 +110,81 @@ export const POST = async (req: Request) => {
     }
     const hashedPassword = await hash(validateData.password);
 
+    const file = data.get('profilePic') as File | null;
+
+    if (!file) {
+      const user = await userModel.create({
+        name: validateData.name,
+        userName: validateData.userName,
+        email: validateData.email,
+        telePhone: validateData.telePhone,
+        gender: validateData.gender,
+        bio: validateData.bio,
+        following: validateData.following,
+        password: hashedPassword,
+      });
+
+      if (validateData.following && validateData.following.length > 0) {
+        for (let i = 0; i < validateData.following.length; i++) {
+          await userModel.findByIdAndUpdate(
+            validateData.following[i],
+            {
+              $push: {
+                followers: user._id,
+              },
+            },
+            {
+              new: false,
+            },
+          );
+        }
+      }
+
+      return NextResponse.json(
+        {
+          state: 'success',
+          message: 'User created successfully',
+          userId: user._id,
+        },
+        { status: 201 },
+      );
+    }
+
+    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validImageTypes.includes(file && file.type)) {
+      return NextResponse.json(
+        {
+          state: 'error',
+          message: 'Invalid image file type.',
+        },
+        { status: 400 },
+      );
+    }
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    const result = await new Promise<CloudinaryUploadResult>(
+      (resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: '/sociogram-apis' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result as CloudinaryUploadResult);
+          },
+        );
+        uploadStream.end(buffer);
+      },
+    );
+
     const user = await userModel.create({
       name: validateData.name,
       userName: validateData.userName,
       email: validateData.email,
       telePhone: validateData.telePhone,
       gender: validateData.gender,
-      profilePic: validateData.profilePic,
       bio: validateData.bio,
+      profilePic: result.secure_url,
       following: validateData.following,
       password: hashedPassword,
     });
