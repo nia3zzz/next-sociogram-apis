@@ -32,6 +32,19 @@ export const POST = async (req: Request) => {
   const bio = data.get('bio');
   const following = data.get('following');
   const password = data.get('password');
+  const confirmPassword = data.get('confirmPassword');
+
+  if (password !== confirmPassword) {
+    return NextResponse.json(
+      {
+        state: 'error',
+        message: 'Passwords do not match.',
+      },
+      {
+        status: 400,
+      },
+    );
+  }
 
   try {
     const validateData = userSignup.parse({
@@ -43,6 +56,7 @@ export const POST = async (req: Request) => {
       bio,
       following,
       password,
+      confirmPassword,
     });
 
     await DBConn();

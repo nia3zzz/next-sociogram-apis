@@ -18,8 +18,7 @@ const decode = async (
   savedDecodedItem: string,
 ): Promise<boolean> => {
   try {
-    await bcrypt.compare(decodeItem.toString(), savedDecodedItem);
-    return true;
+    return await bcrypt.compare(decodeItem.toString(), savedDecodedItem);
   } catch (error) {
     console.error('Error decoding item.', error);
     return false;

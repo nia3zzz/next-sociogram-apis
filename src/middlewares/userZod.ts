@@ -12,6 +12,7 @@ const userSignup = z.object({
     .optional()
     .nullable(),
   password: z.string().min(6, 'Password is required of 6 characters.'),
+  confirmPassword: z.string().min(6, 'Password is required of 6 characters.'),
 });
 
 const userLogin = z
@@ -48,6 +49,14 @@ const verificationCodeDelete = z.object({
   code: z.string().min(6, 'Code should be of 6 characters'),
 });
 
+const updatePassword = z.object({
+  previousPassword: z.string().min(6, 'Password is required of 6 characters.'),
+  newPassword: z.string().min(6, 'Password is required of 6 characters.'),
+  confirmNewPassword: z
+    .string()
+    .min(6, 'Password is required of 6 characters.'),
+});
+
 export {
   userSignup,
   userLogin,
@@ -55,4 +64,5 @@ export {
   follow_UnfollowUser,
   verificationCodeAuth,
   verificationCodeDelete,
+  updatePassword,
 };

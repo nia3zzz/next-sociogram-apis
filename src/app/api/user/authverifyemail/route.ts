@@ -61,7 +61,7 @@ export const POST = async (req: Request) => {
     if (!verificationCodeDocument) {
       return NextResponse.json(
         {
-          state: 'errpr',
+          state: 'error',
           message: 'Code was not generated or might be expired.',
         },
         {
