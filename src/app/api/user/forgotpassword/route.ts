@@ -38,7 +38,7 @@ export const POST = async (req: Request) => {
       },
     );
   } catch (error) {
-    console.error('');
+    console.error('Failed in forgot password', error);
     return NextResponse.json(
       {
         state: 'error',

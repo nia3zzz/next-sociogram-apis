@@ -57,6 +57,14 @@ const updatePassword = z.object({
     .min(6, 'Password is required of 6 characters.'),
 });
 
+const forgotPassword = z.object({
+  code: z.string().min(6, 'Code should be of 6 characters'),
+  newPassword: z.string().min(6, 'Password is required of 6 characters.'),
+  confirmNewPassword: z
+    .string()
+    .min(6, 'Password is required of 6 characters.'),
+});
+
 export {
   userSignup,
   userLogin,
@@ -65,4 +73,5 @@ export {
   verificationCodeAuth,
   verificationCodeDelete,
   updatePassword,
+  forgotPassword,
 };
