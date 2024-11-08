@@ -30,7 +30,7 @@ export const POST = async (req: Request) => {
   const telePhone = data.get('telePhone');
   const gender = data.get('gender');
   const bio = data.get('bio');
-  const following = data.get('following');
+  const following = data.getAll('following');
   const password = data.get('password');
   const confirmPassword = data.get('confirmPassword');
 
