@@ -63,7 +63,7 @@ export const POST = async (req: Request) => {
     await DBConn();
 
     if (!files && validateData.caption) {
-      const createPostDocument: { Id: string } = await postModel.create({
+      const createPostDocument: { _id: string } = await postModel.create({
         author: userId,
         caption: validateData.caption,
       });
@@ -72,7 +72,7 @@ export const POST = async (req: Request) => {
         {
           state: 'success',
           message: 'Your post has been posted.',
-          postId: createPostDocument.Id,
+          postId: createPostDocument._id,
         },
         {
           status: 200,
@@ -137,7 +137,7 @@ export const POST = async (req: Request) => {
         {
           state: 'error',
           message: 'Your post has been posted.',
-          postId: createPostDocument.Id,
+          postId: createPostDocument._id,
         },
         {
           status: 200,
@@ -145,7 +145,7 @@ export const POST = async (req: Request) => {
       );
     }
 
-    const createPostDocument: { Id: string } = await postModel.create({
+    const createPostDocument: { _id: string } = await postModel.create({
       author: userId,
       caption: validateData.caption,
       contentFiles: filesSecureUrl,
@@ -154,7 +154,7 @@ export const POST = async (req: Request) => {
     return NextResponse.json({
       state: 'success',
       message: 'Your post has been posted.',
-      postId: createPostDocument.Id,
+      postId: createPostDocument._id,
     });
   } catch (error) {
     if (error instanceof ZodError) {
