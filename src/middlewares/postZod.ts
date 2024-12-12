@@ -8,4 +8,9 @@ const reactPost = z.object({
   postId: z.string().min(24, 'Invalid id format.'),
 });
 
-export { createPost, reactPost };
+const updatePost = z.object({
+  postId: z.string().min(24, 'Invalid id format.'),
+  caption: z.string().optional().nullable(),
+});
+
+export { createPost, reactPost, updatePost };
