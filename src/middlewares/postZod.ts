@@ -13,4 +13,8 @@ const updatePost = z.object({
   caption: z.string().optional().nullable(),
 });
 
-export { createPost, reactPost, updatePost };
+const createComment = z.object({
+  comment: z.string().min(1, 'Comment cannot be empty.'),
+});
+
+export { createPost, reactPost, updatePost, createComment };
