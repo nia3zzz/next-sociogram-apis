@@ -22,4 +22,15 @@ const updateComment = z.object({
   comment: z.string().min(1, 'Comment cannot be empty.'),
 });
 
-export { createPost, reactPost, updatePost, createComment, updateComment };
+const deleteComment = z.object({
+  commentId: z.string().min(24, 'Invalid id format.'),
+});
+
+export {
+  createPost,
+  reactPost,
+  updatePost,
+  createComment,
+  updateComment,
+  deleteComment,
+};
