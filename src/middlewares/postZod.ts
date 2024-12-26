@@ -17,4 +17,9 @@ const createComment = z.object({
   comment: z.string().min(1, 'Comment cannot be empty.'),
 });
 
-export { createPost, reactPost, updatePost, createComment };
+const updateComment = z.object({
+  commentId: z.string().min(24, 'Invalid id format.'),
+  comment: z.string().min(1, 'Comment cannot be empty.'),
+});
+
+export { createPost, reactPost, updatePost, createComment, updateComment };
