@@ -1,20 +1,3 @@
-// route = /comment/id
-
-//      method=get
-//      id=params(postid)
-//      res=all comments
-
-//      method=post
-//      id=params(postid)
-//      body=json type data
-
-//      method=put
-//      id=params(commentid)
-//      body=json type data
-
-//      method=delete
-//      id=params(postid)
-
 import userModel from '@/models/userModel';
 import postModel from '@/models/postModel';
 import { verifyToken } from '@/lib/jwt';
@@ -27,6 +10,159 @@ import commentModel from '@/models/commentModel';
 interface IParams {
   id: string;
 }
+
+export const GET = async (req: Request, { params }: { params: IParams }) => {
+  const verifyUser = verifyToken(process.env.JWT_SECRET as string, req);
+
+  if (!params) {
+    return NextResponse.json(
+      {
+        state: 'error',
+        message: 'No post id found.',
+      },
+      {
+        status: 400,
+      },
+    );
+  }
+
+  try {
+    await DBConn();
+
+    if (verifyUser) {
+      const userId = verifyUser.id;
+
+      const foundUser = await userModel.findById(userId);
+
+      const blockedFilteredUsers = await userModel.find({
+        $and: [
+          {
+            _id: {
+              $nin: Array.isArray(foundUser.blockedUsers)
+                ? foundUser.blockedUsers
+                : [],
+            },
+          },
+          {
+            blockedUsers: { $nin: [userId] },
+          },
+        ],
+      });
+
+      const postDocument = await postModel.findById(params.id);
+
+      console.log(postDocument);
+
+      if (!postDocument) {
+        return NextResponse.json(
+          {
+            state: 'error',
+            message: 'No post found with this id.',
+          },
+          {
+            status: 404,
+          },
+        );
+      }
+
+      const safeAuthors = blockedFilteredUsers.map((user) => user._id);
+
+      if (safeAuthors.includes(postDocument.author)) {
+        return NextResponse.json(
+          {
+            state: 'error',
+            message: 'Post not found.',
+          },
+          {
+            status: 404,
+          },
+        );
+      }
+
+      if (postDocument.comments.length === 0) {
+        return NextResponse.json(
+          {
+            state: 'success',
+            message: 'No comment found on this post.',
+          },
+          {
+            status: 200,
+          },
+        );
+      }
+
+      const commentDocuments = await commentModel.find({
+        $and: [
+          {
+            postCommentedOn: postDocument._id,
+          },
+          {
+            commentAuthor: {
+              $in: blockedFilteredUsers.map((user) => user._id),
+            },
+          },
+        ],
+      });
+
+      console.log(commentDocuments);
+
+      return NextResponse.json({
+        state: 'success',
+        message: 'Comments has been fetched.',
+        data: commentDocuments,
+      });
+    }
+    const postDocument = await postModel.findById(params.id);
+
+    if (!postDocument) {
+      return NextResponse.json(
+        {
+          state: 'error',
+          message: 'No post found with this id.',
+        },
+        {
+          status: 404,
+        },
+      );
+    }
+
+    console.log(postDocument.comments.length);
+
+    if (postDocument.comments.length === 0) {
+      return NextResponse.json(
+        {
+          state: 'success',
+          message: 'No comment found on this post.',
+        },
+        {
+          status: 200,
+        },
+      );
+    }
+
+    const commentDocuments = await commentModel.find({
+      postCommentedOn: postDocument._id,
+    });
+
+    return NextResponse.json({
+      state: 'success',
+      message: 'Comments has been fetched.',
+      data: commentDocuments,
+    });
+  } catch (error) {
+    console.error('Failed in get comment route: ', error);
+
+    return NextResponse.json(
+      {
+        state: 'error',
+        message: 'Something went wrong.',
+      },
+      {
+        status: 500,
+      },
+    );
+  }
+};
 
 export const POST = async (req: Request, { params }: { params: IParams }) => {
   const verifyUser = verifyToken(process.env.JWT_SECRET as string, req);
