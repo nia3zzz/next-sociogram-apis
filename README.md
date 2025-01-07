@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<h1>Next - Sociogram - APIS</h1>
+<p>This social media api app allows users to perform CRUD operations like a real social media app on posts and users. It uses MongoDB as the database to store data, Next.js API for handling server-side logic and Node.js for server-side runtime environment. The app provides a seamless experience for it's API's.</p>
+<h3>Running the Project Locally</h3>
+  <p>To run this project on your local machine, follow these steps:
 
-## Getting Started
+1. <b>Clone the Repository</b>: Clone this repository to your local machine:
 
-First, run the development server:
+   git clone https://github.com/nia3zzz/next-sociogram-apis
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. <b>Install Dependencies</b>: Install the necessary dependencies using npm or yarn:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   npm install
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   or
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   yarn install
 
-## Learn More
+   or
 
-To learn more about Next.js, take a look at the following resources:
+   pnpm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. <b>Setup Environment Variables</b>: Create a `.env` file in the both of your project directories and add the variables mentioned in the `.env.sample`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. <b>Start the Development Server</b>: Run the following command to start the development server:
 
-## Deploy on Vercel
+   npm start
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. <b>Access the App</b>: Open your web browser and navigate to `http://localhost:3000[server]`, to access the app. You can now use the app locally on your machine, connected to your MongoDB database using the URI specified in the `.env` file.
